@@ -1,0 +1,12 @@
+{
+  "name": "assignment-1-api-backend",
+  "version": "1.0.0",
+  "description": "An API backend for a web app that will store items in a database.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Cole O'Donnell",
+  "license": "ISC"
+}
