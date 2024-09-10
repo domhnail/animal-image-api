@@ -1,7 +1,7 @@
 {
   "name": "assignment-1-api-backend",
   "version": "1.0.0",
-  "description": "An API backend for a web app that will store items in a database.",
+  "description": "An API backend for a web app that will store images of animals as items in a database.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -1,0 +1,1 @@
+An API back end for storing images of animals in a database with unique ID's, name of the animal, description of the image, an image name, a list of tags associated with the content of the image, and a category of animal.
