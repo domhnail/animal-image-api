@@ -1,11 +1,11 @@
 {
-  "name": "assignment-1-api-backend",
+  "name": "animal-image-api",
   "version": "1.0.0",
   "description": "An API backend for a web app that will store images of animals as items in a database.",
-  "main": "server.js",
+  "main": "app.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Cole O'Donnell",
