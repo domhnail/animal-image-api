@@ -1,5 +1,7 @@
 An API back end for storing images of animals in a database with unique ID's, name of the animal, description of the image, an image name, a list of tags associated with the content of the image, and a category of animal.
 
+Testing pushing to remote and my own repo.
+
 Instructions given:
 
     1. Create a new Node.js project (npm init).
