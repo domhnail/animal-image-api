@@ -10,7 +10,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 //routes
-app.use('/api/animals', animalRouter);
+app.use('/api/photo', animalRouter);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
