@@ -22,13 +22,14 @@ router.get('/', (req, res) => {
 });
 
 // .../api/photo/all
-// Get all images
+//GET ALL IMAGES
 router.get('/all', (req, res) => {
   res.send('Get all animal images route.');
 });
 
+//TODO: enable users to search by tags, genre, animal and image size
 // .../api/photo/:id
-// Get an image by id
+//GET AN IMAGE BY ID
 router.get('/:id', (req, res) => {
   const id = req.params.id;
   res.send('Contact by id ' + id);
@@ -40,7 +41,7 @@ router.get('/:id', (req, res) => {
 // .../api/photo/create
 router.post('/create', upload.single('image'), (req, res) => {
   
-  //checking if filename is null, setting it to blank if it is
+  //setting filename to blank
   const filename = req.file ? req.file.filename: '';
   
   //receiving image description and tags
