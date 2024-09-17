@@ -39,9 +39,16 @@ router.get('/:id', (req, res) => {
 //ADDING NEW IMAGES
 // .../api/photo/create
 router.post('/create', upload.single('image'), (req, res) => {
+  
   //checking if filename is null, setting it to blank if it is
   const filename = req.file ? req.file.filename: '';
-  console.log('Uploaded file: ');
+  
+  //receiving image description and tags
+  const {description,tags,animal,image_size,genre} = req.body;
+
+  //logging results
+  console.log('Uploaded file: ' + filename);
+  console.log('Image description: ' + description + "\n" + "Image tags: " + tags);
   res.send('Add a new animal image.');
 });
 
