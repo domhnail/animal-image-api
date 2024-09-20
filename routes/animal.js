@@ -1,7 +1,13 @@
 import express from 'express';
 import multer from 'multer';
+import { PrismaClient } from '@prisma/client';
 
 const router = express.Router();
+
+//prisma setup (logging)
+const prisma = new PrismaClient ({
+  log: ['query', 'info', 'warn', 'error']
+});
 
 //multer setup
 const storage = multer.diskStorage({
@@ -39,7 +45,7 @@ router.get('/:id', (req, res) => {
 
 //ADDING NEW IMAGES
 // .../api/photo/create
-router.post('/create', upload.single('image'), (req, res) => {
+router.post('/create', upload.single('image'), async (req, res) => {
   
   //setting filename to blank
   const filename = req.file ? req.file.filename: '';
@@ -47,10 +53,20 @@ router.post('/create', upload.single('image'), (req, res) => {
   //receiving image description and tags
   const {description,tags,animal,image_size,genre} = req.body;
 
-  //logging results
-  console.log('Uploaded file: ' + filename);
-  console.log('Image description: ' + description + "\n" + "Image tags: " + tags);
-  res.send('Add a new animal image.');
+  //using prisma to add new object to the DB
+  const image = await prisma.image.create({
+    data: {
+      filename: filename,
+      description: description,
+      tags: tags,
+      animal: animal,
+      image_size: image_size,
+      genre: genre
+    },
+  })
+
+  //presenting results
+  res.json(image);
 });
 
 //UPDATING IMAGES
