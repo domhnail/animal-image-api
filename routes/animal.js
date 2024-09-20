@@ -29,19 +29,30 @@ router.get('/', (req, res) => {
 
 // .../api/photo/all
 //GET ALL IMAGES
-router.get('/all', (req, res) => {
-  res.send('Get all animal images route.');
+router.get('/all', async (req, res) => {
+  const images = await prisma.images.findMany();
+
+  res.json(images);
 });
 
 //TODO: enable users to search by tags, genre, animal and image size
+//TODO: make the id search actually work
 // .../api/photo/:id
 //GET AN IMAGE BY ID
-router.get('/:id', (req, res) => {
+router.get('/get/:id', async (req, res) => {
+  //getting ID
   const id = req.params.id;
-  res.send('Contact by id ' + id);
+
+  //searching the table for the id
+  const images = await prisma.images.findUnique({
+    where: {
+      id: parseInt(id),
+    },
+  });
+  res.json(images);
 });
 
-//TODO: make create, update and delete all actually work. Change update logic to work properly.
+//TODO: update the create to better reflect how the filenames are actually handled. user wont be setting filenames I guess.
 
 //ADDING NEW IMAGES
 // .../api/photo/create
