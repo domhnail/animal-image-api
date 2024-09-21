@@ -36,7 +36,6 @@ router.get('/all', async (req, res) => {
 });
 
 //TODO: enable users to search by tags, genre, animal and image size
-//TODO: send a 404 if a record is not found
 // .../api/photo/:id
 //GET AN IMAGE BY ID
 router.get('/read/:id', async (req, res) => {
@@ -49,10 +48,15 @@ router.get('/read/:id', async (req, res) => {
       id: parseInt(id),
     },
   });
-  res.json(image);
+
+  if (!image) {
+    res.status(404).send('Image not found.');
+  } else {
+    res.json(image);
+  }
 });
 
-//TODO: validation, 400 response for missing fields
+//TODO: there's something up with validation here, where if I upload falsely (missing a value in the req.body), it still uploads the image and increments the ID
 //ADDING NEW IMAGES
 // .../api/photo/create
 router.post('/create', upload.single('image'), async (req, res) => {
@@ -63,21 +67,24 @@ router.post('/create', upload.single('image'), async (req, res) => {
   //receiving image description and tags
   const {image_name,description,tags,animal,image_size,genre} = req.body;
 
-  //using prisma to add new object to the DB
-  const image = await prisma.image.create({
-    data: {
-      image_name: image_name,
-      description: description,
-      tags: tags,
-      animal: animal,
-      image_size: image_size,
-      genre: genre,
-      filename: filename
-    },
-  })
-
-  //presenting results
-  res.json(image);
+  if (image_name && description && tags && animal && image_size && genre) {
+    //using prisma to add new object to the DB
+    const image = await prisma.image.create({
+      data: {
+        image_name: image_name,
+        description: description,
+        tags: tags,
+        animal: animal,
+        image_size: image_size,
+        genre: genre,
+        filename: filename
+      },
+    });
+    //presenting results
+    res.json(image);
+  } else {
+    return res.status(400).send('One or more fields were not filled in.');
+  }
 });
 
 //TODO: validation, run a delete on the previous file when changing images out
@@ -91,23 +98,27 @@ router.put('/update', upload.single('image'), async (req, res) => {
   const {id,image_name,description,tags,animal,image_size,genre} = req.body;
 
   //updating record
-  const updateImage = await prisma.image.update({
-    //searching by the id
-    where: {
-      id: parseInt(id),
-    },
-    //passing in the updated record
-    data: {
-      image_name: image_name,
-      description: description,
-      tags: tags,
-      animal: animal,
-      image_size: image_size,
-      genre: genre,
-      filename: filename
-    },
-  })
-  res.send(updateImage);
+  if (image_name && description && tags && animal && image_size && genre) {
+    const updateImage = await prisma.image.update({
+      //searching by the id
+      where: {
+        id: parseInt(id),
+      },
+      //passing in the updated record
+      data: {
+        image_name: image_name,
+        description: description,
+        tags: tags,
+        animal: animal,
+        image_size: image_size,
+        genre: genre,
+        filename: filename
+      },
+    })
+    res.send(updateImage);
+  } else {
+    return res.status(400).send('One or more fields were not filled in.');
+  }
 });
 
 //TODO: validation, 404
