@@ -110,10 +110,21 @@ router.put('/update', upload.single('image'), async (req, res) => {
   res.send(updateImage);
 });
 
+//TODO: validation, 404
+//TODO: delete associated image file
 //DELETING IMAGES
 // .../api/photo/delete
-router.delete('/delete/:id', (req, res) => {
-  res.send('Delete an existing animal image.');
+router.delete('/delete/:id', async (req, res) => {
+  //getting ID
+  const id = req.params.id;
+
+  //searching the table for the id
+  const deleteImage = await prisma.image.delete({
+    where: {
+      id: parseInt(id),
+    },
+  });
+  res.json(deleteImage);
 });
 
 export default router;
