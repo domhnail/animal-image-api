@@ -14,6 +14,7 @@ datasource db {
 
 model Image {
   id          Int       @id @default(autoincrement())
+  image_name  String
   description String
   tags        String // ? makes nullable or optional
   animal      String

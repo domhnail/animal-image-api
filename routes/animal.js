@@ -36,7 +36,7 @@ router.get('/all', async (req, res) => {
 });
 
 //TODO: enable users to search by tags, genre, animal and image size
-//TODO: make the id search actually work
+//TODO: send a 404 if a record is not found
 // .../api/photo/:id
 //GET AN IMAGE BY ID
 router.get('/read/:id', async (req, res) => {
@@ -52,21 +52,21 @@ router.get('/read/:id', async (req, res) => {
   res.json(image);
 });
 
-//TODO: update the create to better reflect how the filenames are actually handled. user wont be setting filenames I guess.
-
+//TODO: validation, 400 response for missing fields
 //ADDING NEW IMAGES
 // .../api/photo/create
 router.post('/create', upload.single('image'), async (req, res) => {
   
-  //setting filename to blank
+  //setting filename to blank if no file was uploaded
   const filename = req.file ? req.file.filename: '';
   
   //receiving image description and tags
-  const {description,tags,animal,image_size,genre} = req.body;
+  const {image_name,description,tags,animal,image_size,genre} = req.body;
 
   //using prisma to add new object to the DB
   const image = await prisma.image.create({
     data: {
+      image_name: image_name,
       description: description,
       tags: tags,
       animal: animal,
@@ -80,15 +80,39 @@ router.post('/create', upload.single('image'), async (req, res) => {
   res.json(image);
 });
 
+//TODO: validation, run a delete on the previous file when changing images out
 //UPDATING IMAGES
 // .../api/photo/update
-router.put('/update', upload.single('image'), (req, res) => {
-  res.send('Update an existing animal image.');
+router.put('/update', upload.single('image'), async (req, res) => {
+
+  const filename = req.file ? req.file.filename: '';
+
+  //receiving updated image description and tags etc.
+  const {id,image_name,description,tags,animal,image_size,genre} = req.body;
+
+  //updating record
+  const updateImage = await prisma.image.update({
+    //searching by the id
+    where: {
+      id: parseInt(id),
+    },
+    //passing in the updated record
+    data: {
+      image_name: image_name,
+      description: description,
+      tags: tags,
+      animal: animal,
+      image_size: image_size,
+      genre: genre,
+      filename: filename
+    },
+  })
+  res.send(updateImage);
 });
 
 //DELETING IMAGES
 // .../api/photo/delete
-router.delete('/delete', (req, res) => {
+router.delete('/delete/:id', (req, res) => {
   res.send('Delete an existing animal image.');
 });
 
