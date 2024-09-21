@@ -30,26 +30,26 @@ router.get('/', (req, res) => {
 // .../api/photo/all
 //GET ALL IMAGES
 router.get('/all', async (req, res) => {
-  const images = await prisma.images.findMany();
-
-  res.json(images);
+  const image = await prisma.image.findMany();
+  
+  res.json(image);
 });
 
 //TODO: enable users to search by tags, genre, animal and image size
 //TODO: make the id search actually work
 // .../api/photo/:id
 //GET AN IMAGE BY ID
-router.get('/get/:id', async (req, res) => {
+router.get('/read/:id', async (req, res) => {
   //getting ID
   const id = req.params.id;
 
   //searching the table for the id
-  const images = await prisma.images.findUnique({
+  const image = await prisma.image.findUnique({
     where: {
       id: parseInt(id),
     },
   });
-  res.json(images);
+  res.json(image);
 });
 
 //TODO: update the create to better reflect how the filenames are actually handled. user wont be setting filenames I guess.
@@ -67,12 +67,12 @@ router.post('/create', upload.single('image'), async (req, res) => {
   //using prisma to add new object to the DB
   const image = await prisma.image.create({
     data: {
-      filename: filename,
       description: description,
       tags: tags,
       animal: animal,
       image_size: image_size,
-      genre: genre
+      genre: genre,
+      filename: filename
     },
   })
 

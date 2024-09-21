@@ -14,12 +14,11 @@ datasource db {
 
 model Image {
   id          Int       @id @default(autoincrement())
-  filename    String?
-  description String?
-  tags        String? // ? makes nullable or optional
-  animal      String?
-  image_size  String?
-  genre       String?
-
+  description String
+  tags        String // ? makes nullable or optional
+  animal      String
+  image_size  String
+  genre       String
+  filename    String
   createdAt   DateTime  @default(now())
 }
