@@ -68,10 +68,6 @@ router.get('/read/:id', async (req, res) => {
 //ADDING NEW IMAGES
 // .../api/photo/create
 router.post('/create', upload.single('image'), async (req, res) => {
-
-  //for deleting failed upload files
-  let failedUpload = function () {
-  }
   
   //setting filename to blank if no file was uploaded
   const filename = req.file ? req.file.filename: '';
@@ -93,10 +89,11 @@ router.post('/create', upload.single('image'), async (req, res) => {
       },
     });
     //presenting results
-    res.status(200).json({message: 'Image successfully uploaded, database entry created.'});
-    res.json(image);
+    return res.status(200).json({message: 'Image successfully uploaded, database entry created.', image});
   } else { //400 when there are null fields submitted
-    fs.unlink(`public/images/${filename}`,failedUpload);
+    fs.unlink(`public/images/${filename}`, function (){
+      console.log('Upload failed because of null field, deleting orphaned image.');
+    });
     return res.status(400).json({message: 'One or more fields were not filled in.'});
   }
 });
@@ -154,7 +151,7 @@ router.delete('/delete/:id', async (req, res) => {
   //     id: parseInt(id),
   //   },
   // });
-  
+
   //searching the table for the id
   const deleteImage = await prisma.image.delete({
     where: {
