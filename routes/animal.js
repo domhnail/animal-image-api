@@ -149,14 +149,24 @@ router.delete('/delete/:id', async (req, res) => {
   //getting ID
   const id = req.params.id;
 
+  // const image = await prisma.image.findUnique({
+  //   where: {
+  //     id: parseInt(id),
+  //   },
+  // });
+  
   //searching the table for the id
   const deleteImage = await prisma.image.delete({
     where: {
       id: parseInt(id),
     },
   });
+
+  const filename = deleteImage.filename;
   
-  fs.unlink(req.image.path);
+  fs.unlink(`public/images/${filename}`,function() {
+    console.log("Image deleted.");
+  });
   res.json(deleteImage);
 });
 
