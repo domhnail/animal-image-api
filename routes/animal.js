@@ -61,8 +61,7 @@ router.get('/read/:id', async (req, res) => {
   }
 });
 
-//TODO: there's something up with validation here, where if I upload falsely (missing a value in the req.body), it still uploads the image and increments the ID
-//run a delete on uploaded file and filename if post fails
+//TODO: there's something up with validation here, where if I upload falsely (missing a value in the req.body), it still and increments the ID
 //TODO: validate file extensions
 //could do switch case for each given null?
 //ADDING NEW IMAGES
@@ -98,11 +97,6 @@ router.post('/create', upload.single('image'), async (req, res) => {
   }
 });
 
-//TODO: validation, run a delete on the previous file when changing images out
-//could do switch case for each given null?
-//TODO: image deletion if a new image is uploaded, checking if an image was uploaded in the first place
-// rec was to make a blank filename variable to assign the new or old image filename to
-// use .map and .filter here
 //UPDATING IMAGES
 // .../api/photo/update
 router.put('/update/:id', upload.single('image'), async (req, res) => {
@@ -127,7 +121,7 @@ router.put('/update/:id', upload.single('image'), async (req, res) => {
     if (!image) {
       res.status(404).json({message: 'Image not found.'});
     }
-    //if image file is uploaded: get the filename to save in db. delete the old image file. set the filename to newfilename
+    //if an image file is uploaded, getting the filename to save in database. deleting the old image file. setting the filename to the newfilename
     else if (filename) { 
       const oldFilename = image.filename;
       fs.unlink(`public/images/${oldFilename}`, function (){
@@ -151,7 +145,7 @@ router.put('/update/:id', upload.single('image'), async (req, res) => {
       });
       return res.status(200).json({message: 'New image successfully uploaded, database entry fields updated.', updatedImage});
     }
-    // if image file NOT uploaded: when updating record with prisma, set the filename to oldfilename
+    //if an image file is not uploaded
     else {
         updatedImage = await prisma.image.update({
         //searching by the id
@@ -170,44 +164,14 @@ router.put('/update/:id', upload.single('image'), async (req, res) => {
       });
       return res.status(200).json({message: 'Database entry fields updated.', updatedImage});
     }
-  } else {
+  } else { //when any fields are null, removing everything
     fs.unlink(`public/images/${filename}`, function (){
       console.log('Image uploaded without a table entry, orphaned image deleted.');
     });
     return res.status(400).json({message: 'One or more fields were not filled in.'});
   }
-
-  // if image file NOT uploaded: when updating record with prisma, set the filename to oldfilename
-
-  //updating record (replace && with ||'s? would make it so that just at least one field has to be filled to update)
-  // if (image_name || description || tags || animal || image_size || genre) {
-  //   const updateImage = await prisma.image.update({
-  //     //searching by the id
-  //     where: {
-  //       id: parseInt(id),
-  //     },
-  //     //passing in the updated record
-  //     data: {
-  //       image_name: image_name,
-  //       description: description,
-  //       tags: tags,
-  //       animal: animal,
-  //       image_size: image_size,
-  //       genre: genre,
-  //       filename: filename
-  //     },
-  //   });
-
-  //   // update record in the database (ensuring filename is new or old name)
-  //   res.status(200).json({message: 'Image updated.'});
-  //   res.json(updateImage);
-  // } else { //400 when fields aren't filled in (need to adjust this actually)
-  //   return res.status(400).json({message: 'One or more fields were not filled in.'});
-  // }
 });
 
-//TODO: validation, 404
-//TODO: delete associated image file
 //DELETING IMAGES
 // .../api/photo/delete
 router.delete('/delete/:id', async (req, res) => {
@@ -221,12 +185,17 @@ router.delete('/delete/:id', async (req, res) => {
     },
   });
 
-  const filename = deleteImage.filename;
-  
-  fs.unlink(`public/images/${filename}`,function() {
-    console.log("Image deleted.");
-  });
-  res.json(deleteImage);
+  //checking that the image to delete actually exists
+  if (!deleteImage) {
+    return res.status(404).json({message: 'Image not found.'});
+  } else {
+    //getting the filename of the image to delete.
+    const filename = deleteImage.filename;
+    fs.unlink(`public/images/${filename}`,function() {
+      console.log("Image deleted.");
+    });
+    return res.status(200).json(deleteImage);
+  }
 });
 
 //TODO: batch process to clean up orphaned images
