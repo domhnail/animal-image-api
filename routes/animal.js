@@ -69,7 +69,7 @@ router.get('/read/:id', async (req, res) => {
 // .../api/photo/create
 router.post('/create', upload.single('image'), async (req, res) => {
   
-  //setting filename to blank if no file was uploaded
+  //checking if a file was uploaded and setting filename to blank if no file was uploaded
   const filename = req.file ? req.file.filename: '';
   
   //receiving image description and tags
@@ -102,40 +102,108 @@ router.post('/create', upload.single('image'), async (req, res) => {
 //could do switch case for each given null?
 //TODO: image deletion if a new image is uploaded, checking if an image was uploaded in the first place
 // rec was to make a blank filename variable to assign the new or old image filename to
+// use .map and .filter here
 //UPDATING IMAGES
 // .../api/photo/update
-router.put('/update', upload.single('image'), async (req, res) => {
-
+router.put('/update/:id', upload.single('image'), async (req, res) => {
+  let updatedImage;
+  //getting id from the request
   const id = req.params.id;
 
+  //checking if a file was uploaded and setting filename to blank if no file was uploaded
   const filename = req.file ? req.file.filename: '';
 
   //receiving updated image description and tags etc.
   const {image_name,description,tags,animal,image_size,genre} = req.body;
 
-  //updating record (replace && with ||'s? would make it so that just at least one field has to be filled to update)
-  if (image_name || description || tags || animal || image_size || genre) {
-    const updateImage = await prisma.image.update({
-      //searching by the id
+  //validating all inputs are filled
+  if (image_name && description && tags && animal && image_size && genre) {
+    //get image by id. return 404 if not found.
+    const image = await prisma.image.findUnique({
       where: {
         id: parseInt(id),
       },
-      //passing in the updated record
-      data: {
-        image_name: image_name,
-        description: description,
-        tags: tags,
-        animal: animal,
-        image_size: image_size,
-        genre: genre,
-        filename: filename
-      },
-    })
-    res.status(200).json({message: 'Image updated.'});
-    res.json(updateImage);
-  } else { //400 when fields aren't filled in (need to adjust this actually)
+    });
+    if (!image) {
+      res.status(404).json({message: 'Image not found.'});
+    }
+    //if image file is uploaded: get the filename to save in db. delete the old image file. set the filename to newfilename
+    else if (filename) { 
+      const oldFilename = image.filename;
+      fs.unlink(`public/images/${oldFilename}`, function (){
+        console.log('Image was updated, old image deleted.');
+      });
+        updatedImage = await prisma.image.update({
+        //searching by the id
+        where: {
+          id: parseInt(id),
+        },
+        //passing in the updated record
+        data: {
+          image_name: image_name,
+          description: description,
+          tags: tags,
+          animal: animal,
+          image_size: image_size,
+          genre: genre,
+          filename: filename
+        },
+      });
+      return res.status(200).json({message: 'New image successfully uploaded, database entry fields updated.', updatedImage});
+    }
+    // if image file NOT uploaded: when updating record with prisma, set the filename to oldfilename
+    else {
+        updatedImage = await prisma.image.update({
+        //searching by the id
+        where: {
+          id: parseInt(id),
+        },
+        //passing in the updated record
+        data: {
+          image_name: image_name,
+          description: description,
+          tags: tags,
+          animal: animal,
+          image_size: image_size,
+          genre: genre
+        },
+      });
+      return res.status(200).json({message: 'Database entry fields updated.', updatedImage});
+    }
+  } else {
+    fs.unlink(`public/images/${filename}`, function (){
+      console.log('Image uploaded without a table entry, orphaned image deleted.');
+    });
     return res.status(400).json({message: 'One or more fields were not filled in.'});
   }
+
+  // if image file NOT uploaded: when updating record with prisma, set the filename to oldfilename
+
+  //updating record (replace && with ||'s? would make it so that just at least one field has to be filled to update)
+  // if (image_name || description || tags || animal || image_size || genre) {
+  //   const updateImage = await prisma.image.update({
+  //     //searching by the id
+  //     where: {
+  //       id: parseInt(id),
+  //     },
+  //     //passing in the updated record
+  //     data: {
+  //       image_name: image_name,
+  //       description: description,
+  //       tags: tags,
+  //       animal: animal,
+  //       image_size: image_size,
+  //       genre: genre,
+  //       filename: filename
+  //     },
+  //   });
+
+  //   // update record in the database (ensuring filename is new or old name)
+  //   res.status(200).json({message: 'Image updated.'});
+  //   res.json(updateImage);
+  // } else { //400 when fields aren't filled in (need to adjust this actually)
+  //   return res.status(400).json({message: 'One or more fields were not filled in.'});
+  // }
 });
 
 //TODO: validation, 404
@@ -145,12 +213,6 @@ router.put('/update', upload.single('image'), async (req, res) => {
 router.delete('/delete/:id', async (req, res) => {
   //getting ID
   const id = req.params.id;
-
-  // const image = await prisma.image.findUnique({
-  //   where: {
-  //     id: parseInt(id),
-  //   },
-  // });
 
   //searching the table for the id
   const deleteImage = await prisma.image.delete({
