@@ -34,8 +34,7 @@ router.get('/', (req, res) => {
 router.get('/all', async (req, res) => {
   const image = await prisma.image.findMany();
   
-  res.status(200).json({message: 'Displaying all image entries.'});
-  res.json(image);
+  res.status(200).json({message: 'Displaying all image entries.', image});
 });
 
 //TODO: enable users to search by tags, genre, animal and image size
@@ -56,8 +55,7 @@ router.get('/read/:id', async (req, res) => {
   if (!image) {
     res.status(404).json({message: 'Image not found.'});
   } else {
-    res.status(200).json({message: `Image with id: ${id} found.`})
-    res.json(image);
+    res.status(200).json({message: `Image with id: ${id} found.`, image})
   }
 });
 
