@@ -59,8 +59,7 @@ router.get('/read/:id', async (req, res) => {
   }
 });
 
-//TODO: there's something up with validation here, where if I upload falsely (missing a value in the req.body), it still and increments the ID
-//TODO: validate file extensions
+//TODO: there's something up with validation here, where if I upload falsely (missing a value in the req.body), it still increments the ID
 //could do switch case for each given null?
 //ADDING NEW IMAGES
 // .../api/photo/create
@@ -119,9 +118,11 @@ router.put('/update/:id', upload.single('image'), async (req, res) => {
     if (!image) {
       res.status(404).json({message: 'Image not found.'});
     }
-    //if an image file is uploaded, getting the filename to save in database. deleting the old image file. setting the filename to the newfilename
+    //if an image file is uploaded
     else if (filename) { 
+      //getting the filename to save in database
       const oldFilename = image.filename;
+      //deleting the old image
       fs.unlink(`public/images/${oldFilename}`, function (){
         console.log('Image was updated, old image deleted.');
       });
@@ -184,15 +185,15 @@ router.delete('/delete/:id', async (req, res) => {
   });
 
   //checking that the image to delete actually exists
-  if (!deleteImage) {
-    return res.status(404).json({message: 'Image not found.'});
-  } else {
+  if (deleteImage) {
     //getting the filename of the image to delete.
     const filename = deleteImage.filename;
     fs.unlink(`public/images/${filename}`,function() {
       console.log("Image deleted.");
     });
-    return res.status(200).json(deleteImage);
+    return res.status(200).json({message: 'Image deleted successfully.', deleteImage}); 
+  } else {
+    return res.status(404).json({message: 'Image not found.'});
   }
 });
 
