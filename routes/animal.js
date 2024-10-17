@@ -33,8 +33,8 @@ router.get('/', (req, res) => {
 //GET ALL IMAGES
 router.get('/all', async (req, res) => {
   const image = await prisma.image.findMany();
-  
-  res.status(200).json({message: 'Displaying all image entries.', image});
+  //message: 'Displaying all image entries.',
+  res.status(200).json({image});
 });
 
 //TODO: enable users to search by tags, genre, animal and image size
@@ -102,6 +102,7 @@ router.put('/update/:id', upload.single('image'), async (req, res) => {
   const id = req.params.id;
 
   //checking if a file was uploaded and setting filename to blank if no file was uploaded
+  //nulling the filename here serves as a check for whether an image file was uploaded or not later
   const filename = req.file ? req.file.filename: '';
 
   //receiving updated image description and tags etc.
