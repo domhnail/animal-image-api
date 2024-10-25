@@ -55,7 +55,7 @@ router.get('/read/:id', async (req, res) => {
   if (!image) {
     res.status(404).json({message: 'Image not found.'});
   } else {
-    res.status(200).json({message: `Image with id: ${id} found.`, image})
+    res.status(200).json({image})
   }
 });
 
